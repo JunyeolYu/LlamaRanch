@@ -828,15 +828,15 @@ void Llama<T>::forward(std::unordered_map<std::string, Tensor>*       output_ten
         // }
     }
 
-    invokeMaskPaddingTokens(masked_tokens_,
-                            input_tensors->at("input_lengths").getPtr<const int>(),  // not_tiled
-                            tiled_prompt_lengths_buf_,
-                            max_cache_seq_len,
-                            max_input_length + max_prefix_prompt_length,
-                            0,
-                            batch_size,
-                            beam_width,
-                            stream_);
+    // invokeMaskPaddingTokens(masked_tokens_,
+    //                         input_tensors->at("input_lengths").getPtr<const int>(),  // not_tiled
+    //                         tiled_prompt_lengths_buf_,
+    //                         max_cache_seq_len,
+    //                         max_input_length + max_prefix_prompt_length,
+    //                         0,
+    //                         batch_size,
+    //                         beam_width,
+    //                         stream_);
 
     // We don't need generation phase for evalution.
 
@@ -1233,14 +1233,14 @@ void Llama<T>::setOutputTensors(std::unordered_map<std::string, Tensor>*       o
             sequence_lengths, sequence_lengths_, output_tensors->at("sequence_length").size(), stream_);
         sync_check_cuda_error();
     }
-    if ((output_tensors->count("output_log_probs") > 0 && output_tensors->at("output_log_probs").data != nullptr)) {
-        invokeTransposeAxis01(output_tensors->at("output_log_probs").getPtr<float>(),
-                              output_log_probs_buf_,
-                              input_tensors->at("output_seq_len").max<uint32_t>() - max_input_length,
-                              batch_size * beam_width,
-                              1,
-                              stream_);
-    }
+    // if ((output_tensors->count("output_log_probs") > 0 && output_tensors->at("output_log_probs").data != nullptr)) {
+    //     invokeTransposeAxis01(output_tensors->at("output_log_probs").getPtr<float>(),
+    //                           output_log_probs_buf_,
+    //                           input_tensors->at("output_seq_len").max<uint32_t>() - max_input_length,
+    //                           batch_size * beam_width,
+    //                           1,
+    //                           stream_);
+    // }
     // Return the cumulative log probability if requested.
     if (output_tensors->count("cum_log_probs") > 0) {
         Tensor cum_log_probs = output_tensors->at("cum_log_probs");
