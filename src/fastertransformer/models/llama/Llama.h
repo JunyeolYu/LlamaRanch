@@ -25,6 +25,7 @@
 #include "src/fastertransformer/models/llama/LlamaWeight.h"
 #include "src/fastertransformer/utils/custom_ar_comm.h"
 #include "src/fastertransformer/utils/prompt_learning.h"
+#include "src/fastertransformer/utils/logger.h"
 
 namespace fastertransformer {
 
@@ -122,6 +123,8 @@ protected:
 
     T*     context_decoder_input_buf_;
     T*     context_decoder_output_buf_;
+    T*     normed_context_decoder_output_buf_;
+    T*     lm_head_context_decoder_output_buf_;
     float* output_log_probs_buf_;
 
     // function pointer callback
