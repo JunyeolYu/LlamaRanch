@@ -24,14 +24,139 @@ import timeit
 import torch
 import torch.distributed as dist
 from transformers import AutoTokenizer
+import datasets
+import re
+from tqdm import tqdm
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path + "/../../..")
 from examples.pytorch.llama.utils.llama import Llama
 
+def load_hellaswag():
+    hellaswag = datasets.load_dataset('hellaswag')
+    validation = hellaswag['validation']
+    validation_zeroshot = validation.filter(lambda example: example['split_type'] == 'zeroshot')
+    print("Hellaswag dataset load finish , len: " + str(len(validation_zeroshot)))
+    return validation_zeroshot
+
+class RequestInstance:
+    def __init__(self, request_id, activity_label, context, endings, tokenizer, label):
+        self.request_id = request_id
+        self.activity_label = activity_label
+        self.context = context
+        self.ending1 = endings[0]
+        self.ending2 = endings[1]
+        self.ending3 = endings[2]
+        self.ending4 = endings[3]
+        self.endings = []
+        for i in range(4):
+            self.endings.append(tokenizer.encode(self.preprocess(endings[i]))[1:])
+
+        self.tokenizer = tokenizer
+        self.label = label
+        self.requests = self.build_requests()
+
+    def preprocess(self,text):
+        text = text.strip()
+        text = text.replace(" [title]", ". ")
+        text = re.sub("\\[.*?\\]", "", text)
+        text = text.replace("  ", " ")
+        return text
+
+    def build_requests(self):
+        self.context = self.tokenizer.encode(self.preprocess(self.activity_label) + self.preprocess(": ") + self.preprocess(self.context))[1:]
+        return [
+            [self.request_id,len(self.context), self.context, 0.0, ending_tok, self.label, i, len(ending_tok)] for i,ending_tok in enumerate(self.endings)            
+        ]
+
+def engineering_dataset(validation_zeroshot, tokenizer):
+    requests = []
+    for i, row in tqdm(enumerate(validation_zeroshot)):
+        temp = RequestInstance(i, row['activity_label'], row['ctx'], row['endings'], tokenizer, int(row['label']))
+        requests.extend(temp.requests)
+
+    requests = sorted(requests, key=lambda x: x[1] + x[-1], reverse=True)
+
+    max_tokens_40 = []
+    max_tokens_80 = []
+    max_tokens_120 = []
+    max_tokens_170 = []
+
+    for r in requests:
+        ttt = r[1] + len(r[4])
+        if ttt <= 40:
+            max_tokens_40.append(r)
+        elif ttt <= 80:
+            max_tokens_80.append(r)
+        elif ttt <= 120:
+            max_tokens_120.append(r)
+        elif ttt <= 170:
+            max_tokens_170.append(r)
+
+    max_batch_sizes_config = [496, 252, 138, 120][::-1] # FT 우리가 수정한 기본 버전으로 돌렸을 때 max [496, 252, 138, 120]
+    
+    print("bucket: ",len(max_tokens_40), len(max_tokens_80), len(max_tokens_120), len(max_tokens_170))
+    for x,y in zip([max_tokens_40,max_tokens_80,max_tokens_120,max_tokens_170],max_batch_sizes_config[::-1]):
+        print(len(x), y, len(x)/y)
+
+    final_reqs = []
+    
+    for i in range(len(max_batch_sizes_config)):
+        current_list = []
+        if i == 3:
+            current_list = max_tokens_40
+        elif i == 2:
+            current_list = max_tokens_80
+        elif i == 1:
+            current_list = max_tokens_120
+        elif i == 0:
+            current_list = max_tokens_170
+
+        for j in range(0, len(current_list), max_batch_sizes_config[i]):
+            final_reqs.append(current_list[j:j+max_batch_sizes_config[i]])
+    return final_reqs
+
+def calculate_accuracy(res):
+    acc = 0
+    nacc = 0
+
+    for r in range(0,len(res), 4):
+        try:
+            outs = sorted(res[r:r+4], key=lambda x: x[6])
+            # assert that outs order is correct
+            assert outs[0][6] == 0
+            assert outs[1][6] == 1
+            assert outs[2][6] == 2
+            assert outs[3][6] == 3
+
+            # [self.request_id,len(self.context), self.context, 0.0, ending_tok, self.label, i]
+            logs = [out[3] for out in outs]
+
+            ending_lens = [len(out[4]) for out in outs]
+            nlogs = [log/ending_lens[i] for i,log in enumerate(logs)]
+
+            pred_label = logs.index(max(logs))
+            norm_pred_label = nlogs.index(max(nlogs))
+
+            label = outs[0][5]
+
+            if pred_label == label:
+                acc += 1
+            if norm_pred_label == label:
+                nacc += 1
+        except:
+            print("Failed while calculating accuracy")
+            pass
+    
+    total_len = len(res)/4
+    acc = acc/total_len
+    nacc = nacc/total_len
+    print("Accuracy:", acc)
+    print("Normalized Accuracy:", nacc)
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--output_len', type=int, default=32,
+    parser.add_argument('--output_len', type=int, default=1,
                         help='output sequence length to generate.')
     parser.add_argument('--beam_width', type=int, default=1,
                         help='beam width for beam search. Using sampling when beam width is 1.')
@@ -104,50 +229,33 @@ def main():
     repetition_penalty = args.repetition_penalty
     inference_data_type = args.inference_data_type
 
-    print("\n=============== Arguments ===============")
-    for arg in vars(args):
-        print("{}: {}".format(arg, getattr(args, arg)))
-    print("=========================================\n")
-
     if tensor_para_size * pipeline_para_size > 1:
-        dist.init_process_group(backend=dist.Backend.MPI)
+        dist.init_process_group("mpi")
     rank = dist.get_rank() if dist.is_initialized() else 0
     device_count = dist.get_world_size() if dist.is_initialized() else 1
     device = rank % device_count
     torch.cuda.set_device(device)
     device = torch.cuda.current_device()
 
+    # Only rank 3 process can print messages
+    if rank<3:
+        os.sys.stdout = open(os.devnull, "w")
+        os.sys.stderror = open(os.devnull, "w")
+
+    print("\n=============== Arguments ===============")
+    for arg in vars(args):
+        print("{}: {}".format(arg, getattr(args, arg)))
+    print("=========================================\n")
+
     # sentencepiece needed
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path, use_fast=False)
 
-    # Inputs
-    contexts = []
-    if args.start_id_file:
-        with open(args.start_id_file, 'r') as f:
-            contexts = f.read().splitlines()
-            batch_size = min(len(contexts), max_batch_size)
-        contexts = contexts[:batch_size]
-        start_ids = [torch.IntTensor([int(i) for i in c.strip().split(',')]) for c in contexts]
-    elif args.sample_input_file:  # conditional case
-        with open(args.sample_input_file, "r") as f:
-            contexts = f.read().splitlines()
-            batch_size = min(len(contexts), max_batch_size)
-        contexts = contexts[:batch_size]
-        start_ids = [torch.tensor(tokenizer.encode(c), dtype=torch.int32, device=device) for c in contexts]
-    else:  # unconditional case
-        batch_size = max_batch_size
-        contexts = ['<|endoftext|>'] * batch_size
-        start_ids = [torch.IntTensor([end_id])] * batch_size
-
-    print("[INFO] batch size: {}".format(batch_size))
-    start_lengths = [len(ids) for ids in start_ids]
-    start_ids = pad_sequence(start_ids, batch_first=True, padding_value=end_id)
-    start_lengths = torch.IntTensor(start_lengths)
-
-    if args.enable_random_seed == True:
-        random_seed_tensor = torch.randint(0, 10000, size=[batch_size], dtype=torch.int64)
-    else:
-        random_seed_tensor = torch.zeros([batch_size], dtype=torch.int64)
+    # PGJ : For Hellaswag
+    validation_zeroshot = []
+    final_reqs = []
+    res = []
+    validation_zeroshot = load_hellaswag()
+    final_reqs = engineering_dataset(validation_zeroshot, tokenizer)
 
     # Prepare model.
     llama = Llama(head_num, size_per_head, inter_size, vocab_size, rotary_embedding, layernorm_eps,
@@ -159,75 +267,58 @@ def main():
 
     if not llama.load(ckpt_path=ckpt_path):
         print("[WARNING] Checkpoint file not found. Model loading is skipped.")
-    with torch.no_grad():
-        tokens_batch = llama(
-            start_ids=start_ids,
-            start_lengths=start_lengths,
-            output_len=start_lengths + output_len,
-            beam_width=beam_width,
-            top_k=top_k * torch.ones(size=[batch_size], dtype=torch.int32),
-            top_p=top_p * torch.ones(size=[batch_size], dtype=torch.float32),
-            beam_search_diversity_rate=beam_search_diversity_rate * torch.ones(size=[batch_size], dtype=torch.float32),
-            temperature=temperature * torch.ones(size=[batch_size], dtype=torch.float32),
-            len_penalty=len_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
-            repetition_penalty=repetition_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
-            random_seed=random_seed_tensor,
-            return_output_length=False,
-            return_cum_log_probs=0)
-        if tokens_batch is not None and rank == 0:
-            tokens_batch = tokens_batch.cpu().numpy()
-            for i, (context, tokens) in enumerate(zip(contexts, tokens_batch)):
-                for beam_id in range(beam_width):
-                    token = tokens[beam_id][start_lengths[i]:]  # exclude context input from the output
-                    output = tokenizer.decode(token)
-                    print(f'[INFO] batch {i}, beam {beam_id}:\n[Context]\n{context}\n\n[Generated]\n{token}\n\n[Output]\n{output}\n')
+    
+    ########### Eval Harness ###########
+    res = []
 
-        # Measure inference time.
-        if args.time:
-            iterations = 10
-            # warmup
-            for i in range(iterations):
-                tokens_batch = llama(
-                    start_ids=start_ids,
-                    start_lengths=start_lengths,
-                    output_len=output_len,
-                    beam_width=beam_width,
-                    top_k=top_k * torch.ones(size=[batch_size], dtype=torch.int32),
-                    top_p=top_p * torch.ones(size=[batch_size], dtype=torch.float32),
-                    beam_search_diversity_rate=beam_search_diversity_rate * torch.ones(size=[batch_size], dtype=torch.float32),
-                    temperature=temperature * torch.ones(size=[batch_size], dtype=torch.float32),
-                    len_penalty=len_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
-                    repetition_penalty=repetition_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
-                    random_seed=random_seed_tensor,
-                    return_output_length=False,
-                    return_cum_log_probs=0)
+    for i in tqdm(range(len(final_reqs))):
+        prompts = final_reqs[i]
 
-            batch_num = 0
-            token_num = 0
-            time = timeit.default_timer()
-            for i in range(iterations):
-                tokens_batch = llama(
-                    start_ids=start_ids,
-                    start_lengths=start_lengths,
-                    output_len=output_len,
-                    beam_width=beam_width,
-                    top_k=top_k * torch.ones(size=[batch_size], dtype=torch.int32),
-                    top_p=top_p * torch.ones(size=[batch_size], dtype=torch.float32),
-                    beam_search_diversity_rate=beam_search_diversity_rate * torch.ones(size=[batch_size], dtype=torch.float32),
-                    temperature=temperature * torch.ones(size=[batch_size], dtype=torch.float32),
-                    len_penalty=len_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
-                    repetition_penalty=repetition_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
-                    random_seed=random_seed_tensor,
-                    return_output_length=False,
-                    return_cum_log_probs=0)
-                batch_num += 1
-                for j, tokens in enumerate(tokens_batch):
-                    token_num += tokens.shape[-1] - start_lengths[j]
-            time_elapsed = timeit.default_timer() - time
-            throughput = token_num / time_elapsed
-            print(f"[INFO] FT-LLAMA generates {batch_num} batches, taking {time_elapsed:0.3f} secs "
-                  f"to generate {token_num} tokens, {throughput:0.3f} tokens/sec.")
+        prompt_tokens = [prompt[2]+prompt[4][:-1] for prompt in prompts]
+        prompt_size = [prompt[1]+prompt[-1]-1 for prompt in prompts]
+        start_lengths = torch.IntTensor(prompt_size)#[prompt[1] for prompt in prompts]
+        
+        tokens = torch.full((len(prompts), max(prompt_size)), 0, dtype = torch.int32, device='cuda')
+        for k, t in enumerate(prompt_tokens):
+            tokens[k, : prompt_size[k]] = torch.tensor(t)
 
+        with torch.no_grad():
+            # PGJ: return_output_length를 True로, return_cum_log_probs를 0이 아니게 주면
+            # forward 시 (output_ids, output_lengths, output_cum_log_probs)로 반환
+            batch_size = len(prompts)
+            tokens_batch, output_lengths, output_log_probs = llama(
+                start_ids=tokens,
+                start_lengths=start_lengths,
+                output_len=0,
+                beam_width=beam_width,
+                top_k=top_k * torch.ones(size=[batch_size], dtype=torch.int32),
+                top_p=top_p * torch.ones(size=[batch_size], dtype=torch.float32),
+                beam_search_diversity_rate=beam_search_diversity_rate * torch.ones(size=[batch_size], dtype=torch.float32),
+                temperature=temperature * torch.ones(size=[batch_size], dtype=torch.float32),
+                len_penalty=len_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
+                repetition_penalty=repetition_penalty * torch.ones(size=[batch_size], dtype=torch.float32),
+                random_seed=torch.zeros([batch_size], dtype=torch.int64),
+                return_output_length=True,
+                return_cum_log_probs=0)
+            torch.cuda.empty_cache()
+            if(rank == 3):
+                multi_logits = torch.nn.functional.log_softmax(output_log_probs, dim=-1)
+                
+                _res = []
+                for logits, prompt in zip(multi_logits, prompts):
+                    _input, ending, el = prompt[1]-1, prompt[4], prompt[-1]
+                    logits = logits[_input:_input+el].unsqueeze(0)  # [1, seq, vocab]
+                    ending = torch.tensor(ending, dtype=torch.long, device='cuda').view(1,-1,1)
+                    answer = torch.gather(logits, 2, ending).squeeze(-1).sum()  # [1, ]
+                    _res.append(answer)
+                for prompt, ans in zip(prompts, _res):
+                    prompt[3] = ans
+            if(rank == 3):
+                res.extend(prompts)
+    if(rank == 3):
+        res = sorted(res, key=lambda x: x[0])
+        calculate_accuracy(res)
+    ####################################
 
 if __name__ == '__main__':
     main()
