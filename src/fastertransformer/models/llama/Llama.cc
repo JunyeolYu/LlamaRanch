@@ -1248,6 +1248,7 @@ void Llama<T>::setOutputTensors(std::unordered_map<std::string, Tensor>*       o
         FT_CHECK_WITH_INFO(test.size() == batch_size * beam_width * max_input_length * vocab_size_,
                            "The shape of logits_buf does not match with batch_size * beam_width * max_input_length * vocab_size_");
         cudaAutoCpy(test.getPtr<half>(), (half*)lm_head_context_decoder_output_buf_, test.size(), stream_);
+    }
 }
 
 template<typename T>
