@@ -83,23 +83,23 @@ private:
 
 protected:
     T*       padded_embedding_kernel_;
-    T*       padded_embedding_bias_;
+    // T*       padded_embedding_bias_;
     const T* padded_embedding_kernel_ptr_;
 
     T* input_attention_mask_;
 
     T* decoder_input_buf_;
     T* decoder_output_buf_;
-    T* normed_decoder_output_buf_;
+    // T* normed_decoder_output_buf_;
 
-    float* logits_buf_;
-    float* nccl_logits_buf_;
+    // float* logits_buf_;
+    // float* nccl_logits_buf_;
     float* cum_log_probs_;
 
     bool*     finished_buf_;
     bool*     h_finished_buf_;
     int*      sequence_lengths_          = nullptr;
-    int*      tiled_total_padding_count_ = nullptr;
+    // int*      tiled_total_padding_count_ = nullptr;
     uint32_t* seq_limit_len_             = nullptr;
 
     T*   key_cache_;
@@ -117,15 +117,15 @@ protected:
     int*  parent_ids_buf_;
     int*  start_ids_buf_;
     int*  end_ids_buf_;
-    bool* masked_tokens_ = nullptr;
+    // bool* masked_tokens_ = nullptr;
 
-    bool* generation_should_stop_ = nullptr;
+    // bool* generation_should_stop_ = nullptr;
 
     T*     context_decoder_input_buf_;
     T*     context_decoder_output_buf_;
     T*     normed_context_decoder_output_buf_;
     T*     lm_head_context_decoder_output_buf_;
-    float* output_log_probs_buf_;
+    // float* output_log_probs_buf_;
 
     // function pointer callback
     using callback_sig                 = void(std::unordered_map<std::string, Tensor>*, void*);

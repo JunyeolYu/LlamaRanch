@@ -107,8 +107,8 @@ void Llama<T>::allocateBuffer(
             (T*)(allocator_->reMalloc(padded_embedding_kernel_, sizeof(T) * hidden_units_ * vocab_size_padded_, true));
         padded_embedding_kernel_ptr_ = padded_embedding_kernel_;
 
-        padded_embedding_bias_ =
-            (T*)(allocator_->reMalloc(padded_embedding_bias_, sizeof(T) * vocab_size_padded_, true));
+        // padded_embedding_bias_ =
+        //     (T*)(allocator_->reMalloc(padded_embedding_bias_, sizeof(T) * vocab_size_padded_, true));
     }
 
     input_attention_mask_ = (T*)(allocator_->reMalloc(
@@ -116,11 +116,11 @@ void Llama<T>::allocateBuffer(
     decoder_input_buf_ = (T*)(allocator_->reMalloc(decoder_input_buf_, sizeof(T) * batchxbeam * hidden_units_, false));
     decoder_output_buf_ =
         (T*)(allocator_->reMalloc(decoder_output_buf_, sizeof(T) * batchxbeam * hidden_units_, false));
-    normed_decoder_output_buf_ =
-        (T*)(allocator_->reMalloc(normed_decoder_output_buf_, sizeof(T) * batchxbeam * hidden_units_, false));
-    logits_buf_ = (float*)(allocator_->reMalloc(logits_buf_, sizeof(float) * batchxbeam * vocab_size_padded_, false));
-    nccl_logits_buf_ =
-        (float*)(allocator_->reMalloc(nccl_logits_buf_, sizeof(float) * batchxbeam * vocab_size_padded_, false));
+    // normed_decoder_output_buf_ =
+    //     (T*)(allocator_->reMalloc(normed_decoder_output_buf_, sizeof(T) * batchxbeam * hidden_units_, false));
+    // logits_buf_ = (float*)(allocator_->reMalloc(logits_buf_, sizeof(float) * batchxbeam * vocab_size_padded_, false));
+    // nccl_logits_buf_ =
+    //     (float*)(allocator_->reMalloc(nccl_logits_buf_, sizeof(float) * batchxbeam * vocab_size_padded_, false));
     cum_log_probs_    = (float*)(allocator_->reMalloc(cum_log_probs_, sizeof(float) * batchxbeam, false));
     finished_buf_     = (bool*)(allocator_->reMalloc(finished_buf_, sizeof(bool) * batchxbeam, false));
     h_finished_buf_   = new bool[batchxbeam];
@@ -143,15 +143,15 @@ void Llama<T>::allocateBuffer(
     tiled_input_ids_buf_ =
         (int*)(allocator_->reMalloc(tiled_input_ids_buf_, sizeof(int) * batchxbeam * max_input_len, true));
     tiled_input_lengths_buf_ = (int*)(allocator_->reMalloc(tiled_input_lengths_buf_, sizeof(int) * batchxbeam, true));
-    tiled_total_padding_count_ =
-        (int*)allocator_->reMalloc(tiled_total_padding_count_, batchxbeam * sizeof(int), false);
+    // tiled_total_padding_count_ =
+    //     (int*)allocator_->reMalloc(tiled_total_padding_count_, batchxbeam * sizeof(int), false);
 
     transposed_output_ids_buf_ =
         (int*)(allocator_->reMalloc(transposed_output_ids_buf_, sizeof(int) * batchxbeam * max_seq_len, true));
     output_ids_buf_ = (int*)(allocator_->reMalloc(output_ids_buf_, sizeof(int) * batchxbeam * max_seq_len, true));
     parent_ids_buf_ = (int*)(allocator_->reMalloc(parent_ids_buf_, sizeof(int) * batchxbeam * max_seq_len, true));
     seq_limit_len_  = (uint32_t*)(allocator_->reMalloc(seq_limit_len_, sizeof(uint32_t) * batch_size, false));
-    masked_tokens_ = (bool*)(allocator_->reMalloc(masked_tokens_, sizeof(bool) * batchxbeam * max_cache_seq_len, true));
+    // masked_tokens_ = (bool*)(allocator_->reMalloc(masked_tokens_, sizeof(bool) * batchxbeam * max_cache_seq_len, true));
 
     start_ids_buf_ = (int*)(allocator_->reMalloc(start_ids_buf_, sizeof(int) * batch_size, false));
     end_ids_buf_   = (int*)(allocator_->reMalloc(end_ids_buf_, sizeof(int) * batch_size, false));
@@ -164,10 +164,10 @@ void Llama<T>::allocateBuffer(
         normed_context_decoder_output_buf_, sizeof(T) * batchxbeam * max_input_len * hidden_units_, false));
     lm_head_context_decoder_output_buf_ = (T*)(allocator_->reMalloc(
         lm_head_context_decoder_output_buf_, sizeof(T) * vocab_size_padded_ * batchxbeam * max_input_len , false));
-    output_log_probs_buf_ =
-        (float*)(allocator_->reMalloc(output_log_probs_buf_, sizeof(float) * batchxbeam * max_seq_len, false));
+    // output_log_probs_buf_ =
+    //     (float*)(allocator_->reMalloc(output_log_probs_buf_, sizeof(float) * batchxbeam * max_seq_len, false));
 
-    generation_should_stop_ = (bool*)allocator_->reMalloc(generation_should_stop_, sizeof(bool), true, true);
+    // generation_should_stop_ = (bool*)allocator_->reMalloc(generation_should_stop_, sizeof(bool), true, true);
 
     is_allocate_buffer_ = true;
 }
@@ -179,15 +179,15 @@ void Llama<T>::freeBuffer()
         if (vocab_size_ != vocab_size_padded_) {
             padded_embedding_kernel_ptr_ = nullptr;
             allocator_->free((void**)(&padded_embedding_kernel_));
-            allocator_->free((void**)(&padded_embedding_bias_));
+            // allocator_->free((void**)(&padded_embedding_bias_));
         }
 
         allocator_->free((void**)(&input_attention_mask_));
         allocator_->free((void**)(&decoder_input_buf_));
         allocator_->free((void**)(&decoder_output_buf_));
-        allocator_->free((void**)(&normed_decoder_output_buf_));
-        allocator_->free((void**)(&logits_buf_));
-        allocator_->free((void**)(&nccl_logits_buf_));
+        // allocator_->free((void**)(&normed_decoder_output_buf_));
+        // allocator_->free((void**)(&logits_buf_));
+        // allocator_->free((void**)(&nccl_logits_buf_));
         allocator_->free((void**)(&cum_log_probs_));
         allocator_->free((void**)(&finished_buf_));
         delete[] h_finished_buf_;
@@ -203,13 +203,13 @@ void Llama<T>::freeBuffer()
 
         allocator_->free((void**)(&tiled_input_ids_buf_));
         allocator_->free((void**)(&tiled_input_lengths_buf_));
-        allocator_->free((void**)(&tiled_total_padding_count_));
+        // allocator_->free((void**)(&tiled_total_padding_count_));
 
         allocator_->free((void**)(&transposed_output_ids_buf_));
         allocator_->free((void**)(&output_ids_buf_));
         allocator_->free((void**)(&parent_ids_buf_));
         allocator_->free((void**)(&seq_limit_len_));
-        allocator_->free((void**)(&masked_tokens_));
+        // allocator_->free((void**)(&masked_tokens_));
 
         allocator_->free((void**)(&start_ids_buf_));
         allocator_->free((void**)(&end_ids_buf_));
@@ -218,9 +218,9 @@ void Llama<T>::freeBuffer()
         allocator_->free((void**)(&context_decoder_output_buf_));
         allocator_->free((void**)(&normed_context_decoder_output_buf_));
         allocator_->free((void**)(&lm_head_context_decoder_output_buf_));
-        allocator_->free((void**)(&output_log_probs_buf_));
+        // allocator_->free((void**)(&output_log_probs_buf_));
 
-        allocator_->free((void**)(&generation_should_stop_), true);
+        // allocator_->free((void**)(&generation_should_stop_), true);
 
         is_allocate_buffer_ = false;
     }
@@ -585,8 +585,8 @@ void Llama<T>::forward(std::unordered_map<std::string, Tensor>*       output_ten
     // initialize the output ids and parent ids
     cudaMemsetAsync(output_ids_buf_, 0, sizeof(int) * batch_size * beam_width * max_seq_len, stream_);
     cudaMemsetAsync(parent_ids_buf_, 0, sizeof(int) * batch_size * beam_width * max_seq_len, stream_);
-    cudaMemsetAsync(masked_tokens_, false, sizeof(bool) * batch_size * beam_width * max_cache_seq_len, stream_);
-    cudaMemsetAsync(tiled_total_padding_count_, 0, sizeof(int) * batch_size * beam_width, stream_);
+    // cudaMemsetAsync(masked_tokens_, false, sizeof(bool) * batch_size * beam_width * max_cache_seq_len, stream_);
+    // cudaMemsetAsync(tiled_total_padding_count_, 0, sizeof(int) * batch_size * beam_width, stream_);
     if (beam_width > 1) {
         cudaMemsetAsync(cache_indirections_[0], 0, 2 * sizeof(int) * batch_size * beam_width * max_seq_len, stream_);
     }
@@ -771,21 +771,29 @@ void Llama<T>::forward(std::unordered_map<std::string, Tensor>*       output_ten
     if (vocab_size_ == vocab_size_padded_) {
         padded_embedding_kernel_ptr_ = gpt_weights->post_decoder_embedding.kernel;
     }
-    else {
-        cudaMemcpyAsync(padded_embedding_kernel_,
-                        gpt_weights->post_decoder_embedding.kernel,
-                        sizeof(T) * vocab_size_ * hidden_units_,
-                        cudaMemcpyDeviceToDevice,
-                        stream_);
-        cudaMemcpyAsync(padded_embedding_bias_,
-                        gpt_weights->post_decoder_embedding.bias,
-                        sizeof(T) * vocab_size_,
-                        cudaMemcpyDeviceToDevice,
-                        stream_);
-        sync_check_cuda_error();
-    }
+    // else {
+    //     cudaMemcpyAsync(padded_embedding_kernel_,
+    //                     gpt_weights->post_decoder_embedding.kernel,
+    //                     sizeof(T) * vocab_size_ * hidden_units_,
+    //                     cudaMemcpyDeviceToDevice,
+    //                     stream_);
+    //     cudaMemcpyAsync(padded_embedding_bias_,
+    //                     gpt_weights->post_decoder_embedding.bias,
+    //                     sizeof(T) * vocab_size_,
+    //                     cudaMemcpyDeviceToDevice,
+    //                     stream_);
+    //     sync_check_cuda_error();
+    // }
 
-    // Last layer
+    // invokeMaskPaddingTokens(masked_tokens_,
+    //                         input_tensors->at("input_lengths").getPtr<const int>(),  // not_tiled
+    //                         tiled_prompt_lengths_buf_,
+    //                         max_cache_seq_len,
+    //                         max_input_length + max_prefix_prompt_length,
+    //                         0,
+    //                         batch_size,
+    //                         beam_width,
+    //                         stream_);
     if (pipeline_para_.rank_ == pipeline_para_.world_size_ - 1) {
         // LlamaRMSNorm()
         invokeGeneralT5LayerNorm(normed_context_decoder_output_buf_,   // output
