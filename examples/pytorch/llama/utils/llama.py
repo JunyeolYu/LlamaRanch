@@ -263,13 +263,10 @@ class Llama(nn.Module):
         if self.build_model:
             del self.model
             self.build_model = False
-        start = time.time()
         self.model = torch.classes.FasterTransformer.LlamaOp(self.head_num, self.size_per_head, self.inter_size,
                                                                self.layer_num, self.vocab_size, self.rotary_embedding_dim, self.layernorm_eps,
                                                                self.start_id, self.end_id, self.tensor_para_size, self.pipeline_para_size,
                                                                self.max_seq_len, self.use_gptj_residual, self.weights.w)
-        end = time.time()
-        print(f"{end-start} s for loading")
         self.build_model = True
         torch.cuda.empty_cache()
 
