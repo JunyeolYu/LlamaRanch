@@ -1,7 +1,7 @@
 # 💡 Samsung Computer Engineering Challenge 💡
 - Team name: 서교수네 라마농장
 - Affiliation: Computer Systems Lab. (CSL), Sungkyunkwan University
-- Members: Junyeol Yu, Gwanjong Park, Khan Osama
+- Members: Junyeol Yu, Gwanjong Park, Osama Khan
 - E-mail: junyeol.yu@skku.edu, jesj74@g.skku.edu, khan980@g.skku.edu
 - Challenge site: [[link]](https://cechallenge.github.io/)
 <br>
@@ -22,7 +22,30 @@ It aims to efficiently perform LLaMA-30B model inference using Fastertransformer
 - Calculating prediction class from prefill module's output
 - Modified to prevent unnecessary invocation of some of the existing implementations that are not related to performing the target sequence classification task
 - Modified to prevent unnecessary loading of layer weights on each GPU
+- Adjusting dataset for efficient inference
 
 ## Setup
+In a container with `pytorch-23.05-py3` image,
+
+#### Partitioning Model Weights
+```bash
+cd /ft_workspace/FasterTransformer
+sudo mkdir models && sudo chmod -R 777 ./*
+python ./examples/cpp/llama/huggingface_llama_convert.py -saved_dir=./models/llama -in_file=$MODEL_PATH -infer_gpu_num=4 -weight_data_type=fp16 -model_name=llama
+```
+#### Build
+```bash
+cd /ft_workspace/FasterTransformer
+mkdir build && cd build
+git submodule init && git submodule update
+pip3 install fire jax jaxlib transformers datasets sentencepiece
+
+CUDAFLAGS="-include stdio.h" cmake -DSM=70 -DCMAKE_BUILD_TYPE=Release -DBUILD_PYT=ON -DBUILD_MULTI_GPU=ON -D PYTHON_PATH=/usr/bin/python3 ..
+make -j$(nproc)
+```
 
 ## Inference
+```bash
+cd /ft_workspace/FasterTransformer/examples/pytorch/llama
+mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path $CKPT_PATH --tokenizer_path $TOKENIZER_PATH --lib_path $LIB_PATH
+```
