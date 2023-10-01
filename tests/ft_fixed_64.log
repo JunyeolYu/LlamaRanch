@@ -1,0 +1,63 @@
+root@ec9d93199e10:/llm/cechallenge/FasterTransformer_/examples/pytorch/llama# mpirun -n 4 --allow-run-as-root python llama_fixed_bs.py --tensor_para_size 1 --pipeline_para_size 4 --ckpt_path /llm/ft_models/llama_30b_pp/4-gpu/ --tokenizer_path /llm/model/30B_converted_hf/ --lib_path /llm/cechallenge/FasterTransformer_/build/lib/libth_transformer.so --max_batch_size 64
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+
+=============== Arguments ===============
+output_len: 1
+beam_width: 1
+top_k: 1
+top_p: 0.0
+temperature: 1.0
+len_penalty: 0.0
+beam_search_diversity_rate: 0.0
+tensor_para_size: 1
+pipeline_para_size: 4
+ckpt_path: /llm/ft_models/llama_30b_pp/4-gpu/
+tokenizer_path: /llm/model/30B_converted_hf/
+lib_path: /llm/cechallenge/FasterTransformer_/build/lib/libth_transformer.so
+sample_input_file: None
+start_id_file: None
+max_batch_size: 64
+repetition_penalty: 1.0
+max_seq_len: 1024
+inference_data_type: fp16
+time: False
+enable_random_seed: False
+=========================================
+
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+71it [00:00, 702.93it/s]Hellaswag dataset load finish , len: 5041
+5041it [00:06, 796.26it/s]
+5041it [00:06, 774.32it/s]
+5041it [00:06, 787.80it/s]
+5041it [00:06, 743.68it/s]
+[INFO] WARNING: Have initialized the process group
+world size is 4
+4<<- TP(1) * PP(4)
+
+
+========== LOAD ==========
+tensor 0, pipeline 3
+==========================
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[FT][INFO] NCCL initialized rank=3 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x5567931ce2f0] pipeline_para=NcclParam[rank=3, world_size=4, nccl_comm=0x556799088fe0]
+[FT][INFO] NCCL initialized rank=2 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x5653baa0f1b0] pipeline_para=NcclParam[rank=2, world_size=4, nccl_comm=0x5653c08ca2f0]
+[FT][INFO] NCCL initialized rank=0 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x55ef119dbb70] pipeline_para=NcclParam[rank=0, world_size=4, nccl_comm=0x55ef17897230]
+[FT][INFO] NCCL initialized rank=1 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x55c63ccf3530] pipeline_para=NcclParam[rank=1, world_size=4, nccl_comm=0x55c642bae0a0]
+100%|██████████| 316/316 [07:33<00:00,  1.44s/it]
+100%|██████████| 316/316 [07:33<00:00,  1.44s/it]
+100%|██████████| 316/316 [07:33<00:00,  1.44s/it]
+100%|██████████| 316/316 [07:33<00:00,  1.44s/it]
+Accuracy: 0.6290418567744495
+Normalized Accuracy: 0.8196786351914302
+Total time    : 486.65683221817017 s
+Preprocessing : 8.84799838066101 s
+Model loading : 19.960506200790405 s
+Evaluation    : 453.86069107055664 s
+Acc. Cal      : 0.9357564449310303 s
+Others        : 3.051880121231079 s
+root@ec9d93199e10:/llm/cechallenge/FasterTransformer_/examples/pytorch/llama#

@@ -1,0 +1,29 @@
+(ft) work@main1[zptiyVtk-session]:~/llama/llama_khan_rev$ time torchrun --nproc_per_node 4 batch_opt.py --ckpt_dir /home/work/llama/30B/ --tokenizer_path /home/work/llama/30B/tokenizer.model
+/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)> initializing model parallel with size 4> initializing ddp with size 1> initializing pipeline with size 15041normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.527it [00:00, 2101.46it/s]normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.814it [00:00, 2407.10it/s]normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+5041it [00:02, 1739.26it/s]
+5041it [00:02, 1736.89it/s]
+total: 20164
+{0: 200, 1: 200, 2: 200, 3: 200, 4: 200, 5: 200, 6: 200, 7: 200, 8: 200, 9: 200, 10: 200, 11: 200, 12: 200, 13: 200, 14: 200, 15: 200, 16: 200, 17: 200, 18: 200, 19: 200, 20: 300, 21: 300, 22: 300, 23: 300, 24: 300, 25: 300, 26: 300, 27: 300, 28: 300, 29: 300, 30: 300, 31: 300, 32: 300, 33: 300, 34: 300, 35: 300, 36: 300, 37: 300, 38: 300, 39: 300, 40: 300, 41: 300, 42: 300, 43: 300, 44: 300, 45: 300, 46: 300, 47: 300, 48: 300, 49: 300, 50: 300, 51: 300, 52: 300, 53: 500, 54: 500, 55: 500, 56: 500, 57: 500, 58: 500, 59: 500, 60: 500, 61: 1200, 62: 1064}
+pickle: 20164
+after splitting: 20164 
+62Loading
+5041it [00:02, 1728.16it/s]
+5041it [00:02, 1720.81it/s]
+normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.  0%|                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 0/63 [00:00<?, ?it/s]Loaded in 21.47 seconds100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 63/63 [03:27<00:00,  3.29s/it]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 63/63 [03:24<00:00,  3.25s/it]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 63/63 [03:25<00:00,  3.26s/it]100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 63/63 [03:29<00:00,  3.33s/it]
+Accuracy: 0.6284467367585796
+Normalized Accuracy: 0.8196786351914302
+Total_time    : 234.31949043273926 s
+Preprocessing : 5.578232049942017 s
+Model_loading : 22.16026258468628 s
+Evaluation    : 204.8371982574463 s
+Acc_Cal       : 0.984288215637207 s
+Others        : 0.7595093250274658 s
+
+real    4m3.559s
+user    9m33.576s
+sys     5m35.175s
+(ft) work@main1[zptiyVtk-session]:~/llama/llama_khan_rev$

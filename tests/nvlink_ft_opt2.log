@@ -1,0 +1,65 @@
+(ft) work@main1[zptiyVtk-session]:~/llama/FasterTransformer_/examples/pytorch/llama$ mpirun -n 4 --allow-run-as-root python llama_example.py --tensor_para_size 1 --pipeline_para_size 4 --ckpt_path /home/work/llama/30B_pp/4-gpu/ --tokenizer_path /home/work/llama/30B_converted_hf/ --lib_path /home/work/llama/FasterTransformer_/build/lib/libth_transformer.so/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)
+/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)
+/opt/conda/lib/python3.8/site-packages/pandas/compat/_optional.py:161: UserWarning: Pandas requires version '2.7.1' or newer of 'numexpr' (version '2.7.0' currently installed).  warnings.warn(msg, UserWarning)
+/home/work/llama/FasterTransformer_/examples/pytorch/llama
+/home/work/llama/FasterTransformer_/examples/pytorch/llama/home/work/llama/FasterTransformer_/examples/pytorch/llama
+/home/work/llama/FasterTransformer_/examples/pytorch/llama=============== Arguments ===============output_len: 1
+beam_width: 1top_k: 1top_p: 0.0temperature: 1.0len_penalty: 0.0
+beam_search_diversity_rate: 0.0
+tensor_para_size: 1
+pipeline_para_size: 4ckpt_path: /home/work/llama/30B_pp/4-gpu/
+tokenizer_path: /home/work/llama/30B_converted_hf/
+lib_path: /home/work/llama/FasterTransformer_/build/lib/libth_transformer.so
+sample_input_file: None
+start_id_file: None
+max_batch_size: 8
+repetition_penalty: 1.0
+max_seq_len: 1024inference_data_type: fp16
+time: Falseenable_random_seed: False=========================================
+Loading the tokenizer from the `special_tokens_map.json` and the `added_tokens.json` will be removed in `transformers 5`,  it is kept for forward compatibility, but it is recommended to update your `tokenizer_config.json` by uploading it again. You will see the new `added_tokens_decoder` attribute that will store the relevant information.
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565Loading the tokenizer from the `special_tokens_map.json` and the `added_tokens.json` will be removed in `transformers 5`,  it is kept for forward compatibility, but it is recommended to update your `tokenizer_config.json` by uploading it again. You will see the new `added_tokens_decoder` attribute that will store the relevant information.
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+Loading the tokenizer from the `special_tokens_map.json` and the `added_tokens.json` will be removed in `transformers 5`,  it is kept for forward compatibility, but it is recommended to update your `tokenizer_config.json` by uploading it again. You will see the new `added_tokens_decoder` attribute that will store the relevant information.You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+Loading the tokenizer from the `special_tokens_map.json` and the `added_tokens.json` will be removed in `transformers 5`,  it is kept for forward compatibility, but it is recommended to update your `tokenizer_config.json` by uploading it again. You will see the new `added_tokens_decoder` attribute that will store the relevant information.
+You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>. If you see this, DO NOT PANIC! This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thouroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.normalizer.cc(51) LOG(INFO) precompiled_charsmap is empty. use identity normalization.
+0it [00:00, ?it/s]Hellaswag dataset load finish , len: 5041
+5041it [00:07, 668.23it/s] 
+5041it [00:07, 664.73it/s]
+5041it [00:07, 661.63it/s]
+bucket:  1785 4377 9949 4053
+1785 248 7.19758064516129
+4377 126 34.73809523809524
+9949 69 144.18840579710144
+4053 60 67.55
+5041it [00:07, 657.17it/s]
+[INFO] WARNING: Have initialized the process group
+world size is 4
+4<<- TP(1) * PP(4)
+
+
+========== LOAD ==========
+tensor 0, pipeline 3
+==========================
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[WARNING] gemm_config.in is not found; using default GEMM algo
+[FT][INFO] NCCL initialized rank=3 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x5598562002e0] pipeline_para=NcclParam[rank=3, world_size=4, nccl_comm=0x559852c5a230]
+[FT][INFO] NCCL initialized rank=1 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x55cd56f28390] pipeline_para=NcclParam[rank=1, world_size=4, nccl_comm=0x55cd53a1d230]
+[FT][INFO] NCCL initialized rank=0 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x55fcf4e11450] pipeline_para=NcclParam[rank=0, world_size=4, nccl_comm=0x55fcf10de9e0]
+[FT][INFO] NCCL initialized rank=2 world_size=4 tensor_para=NcclParam[rank=0, world_size=1, nccl_comm=0x55be3b12e3c0] pipeline_para=NcclParam[rank=2, world_size=4, nccl_comm=0x55be38748aa0]
+100%|██████████| 256/256 [02:20<00:00,  1.82it/s]
+100%|██████████| 256/256 [02:20<00:00,  1.82it/s]
+100%|██████████| 256/256 [02:20<00:00,  1.82it/s]
+100%|██████████| 256/256 [02:20<00:00,  1.82it/s]
+Accuracy: 0.6292402301130728
+Normalized Accuracy: 0.8198770085300535
+Total_time    : 203.21115612983704 s
+Preprocessing : 10.397119522094727 s
+Model_loading : 49.39545702934265 s
+Evaluation    : 140.93990278244019 s
+Acc_Cal       : 1.1131513118743896 s
+Others        : 1.365525484085083 s
+(ft) work@main1[zptiyVtk-session]:~/llama/FasterTransformer_/examples/pytorch/llama$
