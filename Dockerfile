@@ -1,4 +1,4 @@
-# Base image is 
+# Base image is
 ARG BASE_IMAGE=junyeolyu/torch:2.0.1
 
 FROM ${BASE_IMAGE}
@@ -6,7 +6,10 @@ FROM ${BASE_IMAGE}
 WORKDIR /workspace
 COPY . ${WORKDIR}
 
-# Checkout two repository
+# Checkout two submoudle repository
+RUN git submodule update --init
+
+RUN python -m pip install --upgrade pip
 #RUN git clone https://github.com/JunyeolYu/FasterTransformer_.git
 #RUN git clone https://github.com/JunyeolYu/llama_v1.git
 
@@ -15,9 +18,8 @@ COPY . ${WORKDIR}
 #RUN pip3 install torch-2.0.0-cp310-cp310-linux_x86_64.whl
 
 # Install requirements
-RUN pip install datasets sentencepiece transformers fairscale fire
+RUN python -m pip install datasets sentencepiece transformers fairscale fire
 
 # Install Meta
 WORKDIR /workspace/src/Meta
-RUN pip install -e .
-
+RUN python -m pip install -e .
