@@ -42,7 +42,7 @@ We need to build the library before evaluation. DSM should be set to 70 for the 
 cd /workspace/src/FasterTransformer
 mkdir build && cd build
 git submodule init && git submodule update
-# This packages are already install during the image building
+# These packages are already installed during the image building
 pip3 install fire jax jaxlib transformers datasets sentencepiece
 
 CUDAFLAGS="-include stdio.h" cmake -DSM=70 -DCMAKE_BUILD_TYPE=Release -DBUILD_PYT=ON -DBUILD_MULTI_GPU=ON -D PYTHON_PATH=/usr/bin/python3 ..
@@ -79,4 +79,4 @@ git switch vanilla
 pip install -e .
 torchrun --nproc_per_node 4 example.py --ckpt_dir /model/$TARGET_FOLDER --tokenizer_path /model/$TARGET_FOLDER/tokenizer.model
 ```
-- In this branch `example.py` generates `Meta Vanilla`
+- In this branch, `example.py` generates `Meta Vanilla`
