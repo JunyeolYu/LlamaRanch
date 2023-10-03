@@ -54,7 +54,7 @@ cd /workspace/src/FasterTransformer/examples/pytorch/llama
 mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path /model/$MODEL_PATH --tokenizer_path /model/$HF_TOKENIZER_PATH --lib_path /workspace/src/FasterTransformer/build/lib/libth_transformer.so
 ``` 
 - `llama_example.py` will produce `FT 4_bins`
-- `llama_fixed_bs.py` will produce `FT xx_b` when *xx* is batch size.
+- `llama_fixed_bs.py` will produce `FT xx_b` when *xx* is batch size. In this case, you must set the `--max_batch_size xx`.
 
 For more details, see [FasterTransformer_:Setup](https://github.com/JunyeolYu/FasterTransformer_/blob/46f44bb91ada72bffbfa1976d4cc168b54df2883/README.md#setup)
 
