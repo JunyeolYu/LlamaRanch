@@ -94,7 +94,7 @@ def engineering_dataset(validation_zeroshot, tokenizer):
         elif ttt <= 170:
             max_tokens_170.append(r)
 
-    max_batch_sizes_config = [496, 252, 138, 120][::-1] # FT 우리가 수정한 기본 버전으로 돌렸을 때 max [496, 252, 138, 120]
+    max_batch_sizes_config = [248, 126, 69, 60][::-1] # FT 우리가 수정한 기본 버전으로 돌렸을 때 max [496, 252, 138, 120]
     
     print("bucket: ",len(max_tokens_40), len(max_tokens_80), len(max_tokens_120), len(max_tokens_170))
     for x,y in zip([max_tokens_40,max_tokens_80,max_tokens_120,max_tokens_170],max_batch_sizes_config[::-1]):
