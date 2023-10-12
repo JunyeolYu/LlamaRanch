@@ -39,7 +39,7 @@ The entry point is `/worksapce`.
 ## FasterTransformer Evaluation
 We need to build the library before evaluation. DSM should be set to 70 for the Tesla V100.
 ``` bash
-cd /workspace/src/FasterTransformer
+cd /workspace/src/FT
 mkdir build && cd build
 git submodule init && git submodule update
 # These packages are already installed during the image building
@@ -50,13 +50,13 @@ make -j$(nproc)
 ```
 Then, you can run the evaluation script.
 ``` bash
-cd /workspace/src/FasterTransformer/examples/pytorch/llama
-mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path /model/$MODEL_PATH --tokenizer_path /model/$HF_TOKENIZER_PATH --lib_path /workspace/src/FasterTransformer/build/lib/libth_transformer.so
+cd /workspace/src/FT/examples/pytorch/llama
+mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path /model/$MODEL_PATH --tokenizer_path /model/$HF_TOKENIZER_PATH --lib_path /workspace/src/FT/build/lib/libth_transformer.so
 ``` 
 - `llama_example.py` will produce `FT 4_bins`
 - `llama_fixed_bs.py` will produce `FT xx_b` when *xx* is batch size. In this case, you must set the `--max_batch_size xx`.
 
-For more details, see [FasterTransformer_:Setup](https://github.com/JunyeolYu/FasterTransformer_/blob/46f44bb91ada72bffbfa1976d4cc168b54df2883/README.md#setup)
+For more details, see [FasterTransformer:Setup](https://github.com/JunyeolYu/LlamaRanch/tree/main/src/FT#setup)
 
 ## Meta Evaluation
 The provided `example.py` can be run on a single or multiple GPUs with torchrun and will output completions for two pre-defined prompts.
