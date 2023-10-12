@@ -70,7 +70,7 @@ torchrun --nproc_per_node 4 example.py --ckpt_dir /model/$TARGET_FOLDER --tokeni
 ```
 
 - `example.py` will produce `Meta 4_bins`
-- `example_opt.py` will produces `Meta Greedy`
+- `example_opt.py` will produce `Meta Greedy`
 
 For testing vanilla, change the branch main to `vanilla`.
 ``` bash
