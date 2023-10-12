@@ -1,11 +1,3 @@
-# 💡 Samsung Computer Engineering Challenge 💡
-- Team name: 서교수네 라마농장
-- Affiliation: Computer Systems Lab. (CSL), Sungkyunkwan University
-- Members: Junyeol Yu, Gwanjong Park, Osama Khan
-- E-mail: junyeol.yu@skku.edu, jesj74@g.skku.edu, khan980@g.skku.edu
-- Challenge site: [[link]](https://cechallenge.github.io/)
-<br>
-
 # FasterTransformer
 
 This repository is forked from the [repository](https://github.com/vitrun/FasterTransformer) providing a script and recipe to run the highly optimized transformer-based encoder and decoder component, and it is tested and maintained by NVIDIA.
