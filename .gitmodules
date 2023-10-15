@@ -1,3 +1,6 @@
 [submodule "src/Meta"]
 	path = src/Meta
 	url = https://github.com/JunyeolYu/llama_v1.git
+[submodule "src/FasterTransformer"]
+	path = src/FasterTransformer
+	url = https://github.com/JunyeolYu/FasterTransformer_.git
