@@ -7,7 +7,7 @@ WORKDIR /workspace
 COPY . ${WORKDIR}
 
 # Checkout two submoudle repository
-RUN git submodule update --init
+#RUN git submodule update --init
 
 RUN python -m pip install --upgrade pip
 #RUN git clone https://github.com/JunyeolYu/FasterTransformer_.git
@@ -21,7 +21,7 @@ RUN python -m pip install --upgrade pip
 RUN python -m pip install jax jaxlib datasets sentencepiece transformers fairscale fire
 
 # Install Meta
-WORKDIR /workspace/src/Meta
-RUN python -m pip install -e .
+#WORKDIR /workspace/src/Meta
+#RUN python -m pip install -e .
 
 WORKDIR /workspace
