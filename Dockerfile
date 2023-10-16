@@ -3,7 +3,7 @@ ARG BASE_IMAGE=junyeolyu/torch:2.0.1
 
 FROM ${BASE_IMAGE}
 
-WORKDIR /workspace
+WORKDIR /workspace/LlamaRanch
 COPY . ${WORKDIR}
 
 # Checkout two submoudle repository
