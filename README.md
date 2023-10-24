@@ -6,7 +6,7 @@
 - Challenge site: [[link]](https://cechallenge.github.io/)
 <br>
 
-# Llama Ranch: Batching scheme for improving inference throughput
+# Llama Ranch: High Throughput LLaMA-30B Inference Framework
 
 >Due to the nature of the language model, sequences of various sizes may come into the input of inference.
 >When batching multiple sequences to improve inference throughput, the length of the batch sequence for this is the same based on the longest sequence with padding the remaining sequences.
