@@ -18,8 +18,9 @@ RUN python -m pip install --upgrade pip
 #RUN pip3 install torch-2.0.0-cp310-cp310-linux_x86_64.whl
 
 # Install requirements
-RUN python -m pip install jax jaxlib datasets sentencepiece transformers fairscale fire
-
+RUN python -m pip install jax jaxlib datasets sentencepiece transformers fairscale fire numpysocket
+RUN apt-get update
+RUN apt-get install bc
 # Install Meta
 #WORKDIR /workspace/src/Meta
 #RUN python -m pip install -e .
