@@ -1,1 +1,0 @@
-from SwinTransformer.config import get_config
