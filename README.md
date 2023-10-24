@@ -39,26 +39,25 @@ The entry point is `/worksapce`.
 ## FasterTransformer Evaluation
 We need to build the library before evaluation. DSM should be set to 70 for the Tesla V100.
 ``` bash
-cd /workspace/src/FT
+cd /workspace/src/FasterTransformer
 mkdir build && cd build
 git submodule init && git submodule update
 # These packages are already installed during the image building
-pip3 install fire jax jaxlib transformers datasets sentencepiece
+pip3 install fire jax jaxlib transformers datasets sentencepiece numpysocket
 
 CUDAFLAGS="-include stdio.h" cmake -DSM=70 -DCMAKE_BUILD_TYPE=Release -DBUILD_PYT=ON -DBUILD_MULTI_GPU=ON -D PYTHON_PATH=/usr/bin/python3 ..
 make -j$(nproc)
 ```
 Then, you can run the evaluation script.
 ``` bash
-cd /workspace/src/FT/examples/pytorch/llama
-mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path /model/$MODEL_PATH --tokenizer_path /model/$HF_TOKENIZER_PATH --lib_path /workspace/src/FT/build/lib/libth_transformer.so
+cd /workspace/src/FasterTransformer/examples/pytorch/llama
+FMHA_ENABLE=ON ./exec_evaluation.sh
+#mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path /model/$MODEL_PATH --tokenizer_path /model/$HF_TOKENIZER_PATH --lib_path /workspace/src/FT/build/lib/libth_transformer.so
 ``` 
-- `llama_example.py` will produce `FT 4_bins`
-- `llama_fixed_bs.py` will produce `FT xx_b` when *xx* is batch size. In this case, you must set the `--max_batch_size xx`.
 
 For more details, see [FasterTransformer:Setup](https://github.com/JunyeolYu/LlamaRanch/tree/main/src/FT#setup)
 
-## Meta Evaluation
+## Meta Evaluation (1st Round)
 The provided `example.py` can be run on a single or multiple GPUs with torchrun and will output completions for two pre-defined prompts.
 
 In this repository, a 4-GPU inference setting is considered.
