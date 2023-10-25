@@ -7,7 +7,7 @@ WORKDIR /workspace/LlamaRanch
 COPY . ${WORKDIR}
 
 # Checkout two submoudle repository
-RUN git submodule update --init
+# RUN git submodule update --init
 
 RUN python -m pip install --upgrade pip
 #RUN git clone https://github.com/JunyeolYu/FasterTransformer_.git
