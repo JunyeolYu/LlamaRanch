@@ -36,11 +36,44 @@ $ docker run --rm --gpus all --ipc=host --shm-size=1g --ulimit memlock=-1 --ulim
 ```
 The entry point is `/worksapce`.
 
+We need to init the submodules.
+```
+cd /workspace/LlamaRanch
+git submodule update --init
+```
+
 ## FasterTransformer Evaluation
+First, we need to convert the huggingface model.
+```bash
+cd /workspace/LlamaRanch/src/FasterTransformer
+sudo mkdir -p models && sudo chmod -R 777 ./*
+python ./examples/cpp/llama/huggingface_llama_convert.py -saved_dir=./models/llama -in_file=$MODEL_PATH -infer_gpu_num=4 -trained_gpu_num=4 -weight_data_type=fp16 -model_name=llama
+```
 We need to build the library before evaluation. DSM should be set to 70 for the Tesla V100.
 ``` bash
-cd /workspace/src/FasterTransformer
+cd /workspace/LlamaRanch/src/FasterTransformer
 mkdir build && cd build
+git submodule init && git submodule update
+# These packages are already installed during the image building
+pip3 install fire jax jaxlib transformers datasets sentencepiece numpysocket
+
+CUDAFLAGS="-include stdio.h" cmake -DSM=70 -DCMAKE_BUILD_TYPE=Release -DBUILD_PYT=ON -DBUILD_MULTI_GPU=ON -D PYTHON_PATH=/usr/bin/python3 ..
+make -j$(nproc)
+```
+Then, you can run the evaluation script. Before running the script, you should change the checkpoint path, tokenizer_path, and library path in the script.
+``` bash
+cd /workspace/LlamaRanch/src/FasterTransformer/examples/pytorch/llama
+FMHA_ENABLE=ON ./exec_evaluation.sh
+``` 
+
+For more details, see [FasterTransformer:Setup](https://github.com/JunyeolYu/FasterTransformer_#setup)
+
+## FasterTransformer Evaluation (1st round)
+We need to build the library before evaluation. DSM should be set to 70 for the Tesla V100.
+``` bash
+cd /workspace/LlamaRanch/src/FasterTransformer
+git switch 1st-round
+mkdir -p build && cd build
 git submodule init && git submodule update
 # These packages are already installed during the image building
 pip3 install fire jax jaxlib transformers datasets sentencepiece numpysocket
@@ -50,19 +83,17 @@ make -j$(nproc)
 ```
 Then, you can run the evaluation script.
 ``` bash
-cd /workspace/src/FasterTransformer/examples/pytorch/llama
-FMHA_ENABLE=ON ./exec_evaluation.sh
-#mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path /model/$MODEL_PATH --tokenizer_path /model/$HF_TOKENIZER_PATH --lib_path /workspace/src/FT/build/lib/libth_transformer.so
+cd /workspace/LlamaRanch/src/FasterTransformer/examples/pytorch/llama
+mpirun -n 4 --allow-run-as-root python llama_example.py --output_len 1 --pipeline_para_size 4 --ckpt_path /model/$MODEL_PATH --tokenizer_path /model/$HF_TOKENIZER_PATH --lib_path /workspace/LlamaRanch/src/FasterTransformer/build/lib/libth_transformer.so
 ``` 
 
-For more details, see [FasterTransformer:Setup](https://github.com/JunyeolYu/LlamaRanch/tree/main/src/FT#setup)
 
 ## Meta Evaluation (1st Round)
 The provided `example.py` can be run on a single or multiple GPUs with torchrun and will output completions for two pre-defined prompts.
 
 In this repository, a 4-GPU inference setting is considered.
 ``` bash
-cd /workspace/src/Meta
+cd /workspace/LlamaRanch/src/Meta
 # Install this repository, if you need
 pip install -e .
 torchrun --nproc_per_node 4 example.py --ckpt_dir /model/$TARGET_FOLDER --tokenizer_path /model/$TARGET_FOLDER/tokenizer.model
@@ -73,7 +104,7 @@ torchrun --nproc_per_node 4 example.py --ckpt_dir /model/$TARGET_FOLDER --tokeni
 
 For testing vanilla, change the branch main to `vanilla`.
 ``` bash
-cd /workspace/src/Meta
+cd /workspace/LlamaRanch/src/Meta
 git switch vanilla
 pip install -e .
 torchrun --nproc_per_node 4 example.py --ckpt_dir /model/$TARGET_FOLDER --tokenizer_path /model/$TARGET_FOLDER/tokenizer.model
